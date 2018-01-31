@@ -36,7 +36,7 @@ Building a private virtualenv and project directory is used to perform `python -
 - `project_path`:       The path to your Python lambda project, _not_ the `.py` file.
 - `output_path`:        Where to write the final zip.
 - `runtime`:            *Optional*. Defaults to `python3.6`.
-= `requirements_file`:  *Optional*. Not providing a requirements.txt will still build a virtualenv, but will otherwise work normally.
+- `requirements_file`:  *Optional*. Not providing a requirements.txt will still build a virtualenv, but will otherwise work normally.
 
 ## Outputs
 
