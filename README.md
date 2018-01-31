@@ -32,16 +32,16 @@ Building a private virtualenv and project directory is used to perform `python -
     }
 ```
 
-`name`:               the name of this zip. used to construct the payload zip filename.
-`project_path`:       The path to your Python lambda project, _not_ the `.py` file.
-`output_path`:        Where to write the final zip.
-`runtime`:            *Optional*. Defaults to `python3.6`.
-`requirements_file`:  *Optional*. Not providing a requirements.txt will still build a virtualenv, but will otherwise work normally.
+- `name`:               the name of this zip. used to construct the payload zip filename.
+- `project_path`:       The path to your Python lambda project, _not_ the `.py` file.
+- `output_path`:        Where to write the final zip.
+- `runtime`:            *Optional*. Defaults to `python3.6`.
+= `requirements_file`:  *Optional*. Not providing a requirements.txt will still build a virtualenv, but will otherwise work normally.
 
 ## Outputs
 
-`path`: The path to the final zip. This will be in the form of `${var.name}_payload.zip`, to allow for multiple uses of this module in a project
-`sha256`: a `base64sha256()`-compatible sha256 representing the archive, for use in [source_code_hash](https://www.terraform.io/docs/providers/aws/r/lambda_function.html#source_code_hash).
+- `path`: The path to the final zip. This will be in the form of `${var.name}_payload.zip`, to allow for multiple uses of this module in a project
+- `sha256`: a `base64sha256()`-compatible sha256 representing the archive, for use in [source_code_hash](https://www.terraform.io/docs/providers/aws/r/lambda_function.html#source_code_hash).
 
 ## License
 
