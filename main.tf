@@ -4,11 +4,12 @@
 
 data "external" "requirements_sha" {
   program = ["bash", "${path.module}/scripts/requirements_sha.sh"]
-  
+
   query = {
     requirements_file = "${var.requirements_file != "" ? var.requirements_file : "null" }"
     name              = "${var.name}"
   }
+
   # returns 1 result, a sha
 }
 
@@ -16,44 +17,44 @@ data "external" "requirements_sha" {
 # If it has, we need to rebuild the project
 
 data "external" "project_sha" {
-  
   program = ["bash", "${path.module}/scripts/project_sha.sh"]
-  
+
   query = {
     project_path = "${var.project_path}"
   }
+
   # returns 1 result, a sha
 }
 
 # This will create a new work directory only if the requirements
 # has changed
 resource "null_resource" "make_virtualenv_work_dir" {
-
   triggers {
-    requirements      = "${data.external.requirements_sha.result["sha"]}"
+    requirements = "${data.external.requirements_sha.result["sha"]}"
+
     # the virtualenv has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
-    project           = "${data.external.project_sha.result["sha"]}"
+    project = "${data.external.project_sha.result["sha"]}"
   }
+
   provisioner "local-exec" {
     command = "${path.module}/scripts/mktmp.sh virtualenv ${data.external.requirements_sha.result["sha"]}"
   }
 }
 
-
 resource "null_resource" "make_project_work_dir" {
-
   triggers {
-    requirements      = "${data.external.requirements_sha.result["sha"]}"
+    requirements = "${data.external.requirements_sha.result["sha"]}"
+
     # the virtualenv has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
-    project           = "${data.external.project_sha.result["sha"]}"
+    project = "${data.external.project_sha.result["sha"]}"
   }
+
   provisioner "local-exec" {
     command = "${path.module}/scripts/mktmp.sh project ${data.external.project_sha.result["sha"]}"
   }
 }
-
 
 resource "null_resource" "build_payload" {
   triggers {
@@ -62,8 +63,8 @@ resource "null_resource" "build_payload" {
 
   depends_on = [
     "null_resource.make_project_work_dir",
-    "null_resource.make_virtualenv_work_dir", 
-    "null_resource.build_virtualenv"
+    "null_resource.make_virtualenv_work_dir",
+    "null_resource.build_virtualenv",
   ]
 
   provisioner "local-exec" {
@@ -75,24 +76,26 @@ resource "null_resource" "build_payload" {
   }
 }
 
-
 resource "null_resource" "build_virtualenv" {
   triggers {
     project_sha      = "${data.external.project_sha.result["sha"]}"
     requirements_sha = "${data.external.requirements_sha.result["sha"]}"
   }
+
   depends_on = ["null_resource.make_virtualenv_work_dir"]
+
   provisioner "local-exec" {
     command = "${path.module}/scripts/build_virtualenv.sh ${var.runtime} ${var.requirements_file != "" ? var.requirements_file : "null"} ${data.external.requirements_sha.result["sha"]}"
   }
 }
 
-
 resource "null_resource" "cleanup_virtualenv_work_directory" {
   triggers {
     project = "${null_resource.build_payload.id}"
   }
+
   depends_on = ["null_resource.build_payload"]
+
   provisioner "local-exec" {
     command = "${path.module}/scripts/cleanup.sh ${data.external.requirements_sha.result["sha"]}"
   }
@@ -102,20 +105,23 @@ resource "null_resource" "cleanup_project_work_directory" {
   triggers {
     project = "${null_resource.build_payload.id}"
   }
+
   depends_on = ["null_resource.build_payload"]
+
   provisioner "local-exec" {
     command = "${path.module}/scripts/cleanup.sh ${data.external.project_sha.result["sha"]}"
   }
 }
 
-
 data "external" "payload_sha" {
-  program = ["bash","${path.module}/scripts/payload_sha.sh"]
+  program = ["bash", "${path.module}/scripts/payload_hash.sh"]
+
   query = {
-    name              = "${var.name}"
-    output_path       = "${var.output_path}"
+    name        = "${var.name}"
+    output_path = "${var.output_path}"
+
     # forces a logical dependency, without causing it to pop a 
     # 'are you sure you want to apply' for nil changes.
-    resource_id       = "${null_resource.build_payload.id}"
+    resource_id = "${null_resource.build_payload.id}"
   }
 }

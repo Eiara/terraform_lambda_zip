@@ -13,11 +13,11 @@ variable "output_path" {
 # Optional settings
 
 variable "runtime" {
-  default = "python3.6"
+  default     = "python3.6"
   description = "Python runtime. defaults to 3.6."
 }
 
 variable "requirements_file" {
-  default = ""
+  default     = ""
   description = "the path to the requirements file. Can be empty."
 }

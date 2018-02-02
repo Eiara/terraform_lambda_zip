@@ -6,6 +6,8 @@ It _requires_ that you have the following packages installed:
 
  - `jq`
  - `pyenv`
+ - Perl `shasum`
+ - BSD `md5`
  - `python2.7` and `python3.6`, selectable via `pyenv`
  - `virtualenv`, in the selected python runtime, installed via `pip`
  - `terraform` v0.11.2 or higher. This project _may_ be usable with lower, but it is _untested._
@@ -42,6 +44,8 @@ Building a private virtualenv and project directory is used to perform `python -
 
 - `path`: The path to the final zip. This will be in the form of `${var.name}_payload.zip`, to allow for multiple uses of this module in a project
 - `sha256`: a `base64sha256()`-compatible sha256 representing the archive, for use in [source_code_hash](https://www.terraform.io/docs/providers/aws/r/lambda_function.html#source_code_hash).
+- `md5`: Suitable for using in the S3 bucket object etag.
+
 
 ## License
 

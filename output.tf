@@ -5,3 +5,7 @@ output "path" {
 output "sha256" {
   value = "${data.external.payload_sha.result["sha"]}"
 }
+
+output "md5" {
+  value = "${data.external.payload_sha.result["md5"]}"
+}
