@@ -20,6 +20,8 @@ Because it uses temporary directories extensively, it _requires_ a user-provided
 
 Building a private virtualenv and project directory is used to perform `python -m compileall`, in order to create the appropriate `.pyc` files. This is done to ensure faster startup time for the Lambda function.
 
+Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. This is done to provide a stable indicator of whether or not a file has been deleted, and if it needs to be re-created.
+
 ## Usage
 
 ```
@@ -42,8 +44,9 @@ Building a private virtualenv and project directory is used to perform `python -
 
 ## Outputs
 
-- `path`: The path to the final zip. This will be in the form of `${var.name}_payload.zip`, to allow for multiple uses of this module in a project
+- `path`: The path to the final zip. This will be in the form of `${var.name}_{epoch}_payload.zip`, to allow for multiple uses of this module in a project
 - `sha256`: a `base64sha256()`-compatible sha256 representing the archive, for use in [source_code_hash](https://www.terraform.io/docs/providers/aws/r/lambda_function.html#source_code_hash).
+- `filename`: The filename being exported.
 - `md5`: Suitable for using in the S3 bucket object etag.
 
 
