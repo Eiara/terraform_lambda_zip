@@ -137,11 +137,14 @@ resource "null_resource" "cleanup_project_work_directory" {
   }
 }
 
-/*data "external" "payload_sha" {
-  depends_on = ["null_resource.build_payload"]
+data "external" "payload_sha" {
+  /*depends_on = [
+    "null_resource.build_payload"
+  ]*/
   program = ["bash", "${path.module}/scripts/payload_hash.sh"]
 
   query = {
     filename    = "${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
+    id          = "${null_resource.build_payload.id}"
   }
-}*/
+}

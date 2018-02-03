@@ -6,7 +6,7 @@ It _requires_ that you have the following packages installed:
 
  - `jq`
  - `pyenv`
- - Perl `shasum`
+ - `openssl`
  - BSD `md5`
  - `python2.7` and `python3.6`, selectable via `pyenv`
  - `virtualenv`, in the selected python runtime, installed via `pip`
