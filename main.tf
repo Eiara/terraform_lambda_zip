@@ -26,6 +26,26 @@ data "external" "project_sha" {
   # returns 1 result, a sha
 }
 
+data "external" "payload_exists" {
+  program = ["python", "${path.module}/scripts/payload_exists.py"]
+
+  query = {
+    name        = "${var.name}"
+    output_path = "${var.output_path}"
+  }
+  # Returns a stable identifier to determine whether or not
+  # a payload archive actually exists, to provide a metadata
+  # codepoint to tell if a user has, in fact, deleted the payload
+  # file without changing the project or requirements
+  # returns: identifier
+}
+
+/*locals {
+  filename    = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
+  output_path = "${var.output_path}/${local.filename}"
+}*/
+
+
 # This will create a new work directory only if the requirements
 # has changed
 resource "null_resource" "make_virtualenv_work_dir" {
@@ -35,6 +55,7 @@ resource "null_resource" "make_virtualenv_work_dir" {
     # the virtualenv has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
     project = "${data.external.project_sha.result["sha"]}"
+    payload_exists = "${data.external.payload_exists.result["identifier"]}"
   }
 
   provisioner "local-exec" {
@@ -49,6 +70,7 @@ resource "null_resource" "make_project_work_dir" {
     # the virtualenv has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
     project = "${data.external.project_sha.result["sha"]}"
+    payload_exists = "${data.external.payload_exists.result["identifier"]}"
   }
 
   provisioner "local-exec" {
@@ -59,6 +81,7 @@ resource "null_resource" "make_project_work_dir" {
 resource "null_resource" "build_payload" {
   triggers {
     build_virtualenv = "${null_resource.build_virtualenv.id}"
+    payload_exists = "${data.external.payload_exists.result["identifier"]}"
   }
 
   depends_on = [
@@ -72,7 +95,7 @@ resource "null_resource" "build_payload" {
     # Where we're building
     # our SHA, to tell where our work directory is
     # The requirements SHA, so we know where our virtualenv is
-    command = "${path.module}/scripts/build_payload.sh ${var.name} ${var.runtime} ${var.project_path} ${data.external.project_sha.result["sha"]} ${data.external.requirements_sha.result["sha"]} ${var.output_path}"
+    command = "${path.module}/scripts/build_payload.sh ${var.name} ${var.runtime} ${var.project_path} ${data.external.project_sha.result["sha"]} ${data.external.requirements_sha.result["sha"]} ${var.output_path} ${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
   }
 }
 
@@ -80,6 +103,7 @@ resource "null_resource" "build_virtualenv" {
   triggers {
     project_sha      = "${data.external.project_sha.result["sha"]}"
     requirements_sha = "${data.external.requirements_sha.result["sha"]}"
+    payload_exists = "${data.external.payload_exists.result["identifier"]}"
   }
 
   depends_on = ["null_resource.make_virtualenv_work_dir"]
@@ -113,15 +137,11 @@ resource "null_resource" "cleanup_project_work_directory" {
   }
 }
 
-data "external" "payload_sha" {
+/*data "external" "payload_sha" {
+  depends_on = ["null_resource.build_payload"]
   program = ["bash", "${path.module}/scripts/payload_hash.sh"]
 
   query = {
-    name        = "${var.name}"
-    output_path = "${var.output_path}"
-
-    # forces a logical dependency, without causing it to pop a 
-    # 'are you sure you want to apply' for nil changes.
-    resource_id = "${null_resource.build_payload.id}"
+    filename    = "${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
   }
-}
+}*/

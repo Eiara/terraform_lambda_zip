@@ -7,6 +7,7 @@ PYTHON_PROJECT=$3
 WORK_DIR_SHA=$4
 VIRTUALENV_SHA=$5
 OUTPUT_PATH=$6
+FILENAME=$7
 
 
 if ! [ -d $OUTPUT_PATH ]; then
@@ -69,8 +70,6 @@ fi
 # Okay
 # Step 1: copy the project from where it is to the workdir
 
-
-
 cp -r $PYTHON_PROJECT ${WORK_DIR}
 
 pushd ${WORK_DIR}
@@ -86,4 +85,5 @@ cp $SITE_PACKAGES/virtualenv.zip .
 echo "building payload zip"
 zip -q -r virtualenv.zip . -x .git -x requirements.txt
 
-mv virtualenv.zip ${OUTPUT_PATH}/${NAME}_payload.zip
+# Output path is expected to be a fully qualified filename
+mv virtualenv.zip ${OUTPUT_PATH}/${FILENAME}
