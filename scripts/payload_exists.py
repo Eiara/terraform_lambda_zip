@@ -15,7 +15,6 @@ var = json.loads(sys.stdin.read())
 path = "{0}/{1}".format( var["output_path"], "%s_*_payload.zip" % var["name"] )
 
 files = glob.glob(path)
-# woo
 
 if not files:
     # okay we have no files

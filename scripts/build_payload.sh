@@ -48,10 +48,9 @@ echo "INFO: Building virtualenv zip archive"
 pushd $SITE_PACKAGES
 ${BIN}/python -m compileall . > /dev/null 2>&1
 
-# TODO: Figure out how to make this exclude things it shouldn't be including
-# But this is probably fine for now
+# Exclude all the default python stuff that's unnecessary in this context
 
-zip -r -q virtualenv.zip .
+zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*"
 
 if ! [ -e $SITE_PACKAGES/virtualenv.zip ]; then
   # Uh
