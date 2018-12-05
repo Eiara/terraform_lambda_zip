@@ -8,6 +8,6 @@ if ! [ -d $PYTHON_PROJECT ]; then
   exit 1
 fi
 
-PROJECT_HASH=$(find -s $PYTHON_PROJECT -type f -not -file requirements.txt | cpio -o --quiet | shasum -a 256 | cut -d " " -f 1)
+PROJECT_HASH=$(find -s $PYTHON_PROJECT -type f -not -iname requirements.txt | cpio -o --quiet | shasum -a 256 | cut -d " " -f 1)
 
 jq -n --arg sha "$PROJECT_HASH" '{"sha": $sha}'

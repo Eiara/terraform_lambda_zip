@@ -41,8 +41,8 @@ pyenv shell $VERSION
 echo "INFO: Building virtualenv at $WORK_DIR"
 virtualenv --always-copy $WORK_DIR > /dev/null 2>&1
 
-echo "INFO: Installing from pip"
 if [ "$REQUIREMENTS_FILE" != "null" ]; then
+  echo "INFO: Installing from pip"
   ${WORK_DIR}/bin/pip install -r ${REQUIREMENTS_FILE}
 fi
 
