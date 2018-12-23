@@ -104,6 +104,10 @@ resource "null_resource" "build_payload" {
       FILENAME         = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
     }
   }
+  provisioner "local-exec" {
+    when = "destroy"
+    command = "rm -f ${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
+  }
 }
 
 resource "null_resource" "build_virtualenv" {

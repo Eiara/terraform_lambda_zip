@@ -50,7 +50,7 @@ ${BIN}/python -m compileall . > /dev/null 2>&1
 
 # Exclude all the default python stuff that's unnecessary in this context
 
-zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*"
+zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*" -x "boto3*" -x "botocore*"
 
 # zip -r -q virtualenv.zip .
 
