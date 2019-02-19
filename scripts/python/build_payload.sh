@@ -23,7 +23,7 @@ if ! [[ $PYTHON_VERSIONS =~ (^|[[:space:]])$RUNTIME($|[[:space:]]) ]]; then
   exit 1
 fi
 
-VIRTUALENV="${TMPDIR}${VIRTUALENV_SHA}"
+VIRTUALENV="${TMPDIR}${WORK_SHA}"
 SITE_PACKAGES="${VIRTUALENV}/lib/${RUNTIME}/site-packages/"
 BIN="$VIRTUALENV/bin"
 WORK_DIR="${TMPDIR}${WORK_SHA}"
