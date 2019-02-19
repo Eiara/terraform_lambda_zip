@@ -2,12 +2,13 @@
 
 set -e 
 
-PROJECT_DIR=$PROJECT_DIR
-DEPENDENCIES_SHA=$DEPENDENCIES_SHA
-CUSTOM_COMMANDS=$CUSTOM_COMMANDS
+# $PROJECT_DIR
+# $DEPENDENCIES_SHA
+# $CUSTOM_COMMANDS
+
+WORK_DIR=${TMPDIR}${WORK_SHA}
 
 echo "INFO: Using work dir $WORK_DIR"
-WORK_DIR=${TMPDIR}${DEPENDENCIES_SHA}
 
 if ! [ -d $WORK_DIR ]; then
   echo "ERROR: Work directory doesn't exist!"
@@ -17,8 +18,9 @@ fi
 
 # Copy everything to the work dir
 
-pushd $PROJECT_DIR
-cp -R * $WORK_DIR
+pushd $PROJECT_PATH
+cp -R * $WORK_DIR/
+pushd $WORK_DIR
 
 # Install from npm
 
