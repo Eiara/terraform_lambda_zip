@@ -5,7 +5,7 @@ NAME=$PAYLOAD_NAME
 RUNTIME=$PAYLOAD_RUNTIME
 PYTHON_PROJECT=$PROJECT_PATH
 WORK_DIR_SHA=$PROJECT_SHA
-VIRTUALENV_SHA=$REQUIREMENTS_SHA
+VIRTUALENV_SHA=$DEPENDENCIES_SHA
 # OUTPUT_PATH=$6
 # FILENAME=$7
 
@@ -15,7 +15,7 @@ if ! [ -d $OUTPUT_PATH ]; then
   exit 1
 fi
 
-if [ $RUNTIME != "python2.7" ] && [ $RUNTIME != "python3.6" ]; then
+if [ $RUNTIME != "python2.7" ] && [ $RUNTIME != "python3.6" ] && [ $RUNTIME != "python3.7" ]; then
   echo "ERROR: Invalid python runtime $RUNTIME"
   exit 1
 fi

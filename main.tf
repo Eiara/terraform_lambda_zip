@@ -1,12 +1,31 @@
 # Sha the requirements file. This determines whether or not we need to
-# rebuild the virtualenv (which will trigger whether or not we need to rebuild)
+# rebuild the dependencies (which will trigger whether or not we need to rebuild)
 # the payload
 
-data "external" "requirements_sha" {
-  program = ["bash", "${path.module}/scripts/requirements_sha.sh"]
+locals {
+  engine_lookup = {
+    "python3.7"  = "python"
+    "python3.6"  = "python"
+    "nodejs8.10" = "nodejs"
+    "nodejs6.10" = "nodejs"
+  }
+
+  custom = {
+    install = "${join(" && ", coalesce(var.custom_install_commands))}"
+  }
+}
+
+data "null_data_source" "engine" {
+  inputs = {
+    engine = "${lookup(local.engine_lookup, var.runtime)}"
+  }
+}
+
+data "external" "dependencies_sha" {
+  program = ["bash", "${path.module}/scripts/${data.null_data_source.engine.results["engine"]}/dependencies_sha.sh"]
 
   query = {
-    requirements_file = "${var.requirements_file != "" ? var.requirements_file : "null" }"
+    dependencies_file = "${var.dependencies_file != "" ? var.dependencies_file : "null" }"
     name              = "${var.name}"
   }
 
@@ -17,7 +36,7 @@ data "external" "requirements_sha" {
 # If it has, we need to rebuild the project
 
 data "external" "project_sha" {
-  program = ["bash", "${path.module}/scripts/project_sha.sh"]
+  program = ["bash", "${path.module}/scripts/${data.null_data_source.engine.results["engine"]}/project_sha.sh"]
 
   query = {
     project_path = "${var.project_path}"
@@ -43,11 +62,11 @@ data "external" "payload_exists" {
 
 # This will create a new work directory only if the requirements
 # has changed
-resource "null_resource" "make_virtualenv_work_dir" {
+resource "null_resource" "make_dependencies_work_dir" {
   triggers {
     requirements = "${data.external.requirements_sha.result["sha"]}"
 
-    # the virtualenv has been explicitly deleted already, by the cleanup code later on,
+    # the dependencies has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
     project = "${data.external.project_sha.result["sha"]}"
 
@@ -55,7 +74,7 @@ resource "null_resource" "make_virtualenv_work_dir" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/mktmp.sh virtualenv ${data.external.requirements_sha.result["sha"]}"
+    command = "${path.module}/scripts/mktmp.sh dependencies ${data.external.requirements_sha.result["sha"]}"
   }
 }
 
@@ -63,7 +82,7 @@ resource "null_resource" "make_project_work_dir" {
   triggers {
     requirements = "${data.external.requirements_sha.result["sha"]}"
 
-    # the virtualenv has been explicitly deleted already, by the cleanup code later on,
+    # the dependencies has been explicitly deleted already, by the cleanup code later on,
     # so if the project has changed we need to rebuild it
     project = "${data.external.project_sha.result["sha"]}"
 
@@ -77,54 +96,62 @@ resource "null_resource" "make_project_work_dir" {
 
 resource "null_resource" "build_payload" {
   triggers {
-    build_virtualenv = "${null_resource.build_virtualenv.id}"
-    payload_exists   = "${data.external.payload_exists.result["identifier"]}"
+    build_dependencies = "${null_resource.build_dependencies.id}"
+    payload_exists     = "${data.external.payload_exists.result["identifier"]}"
   }
 
   depends_on = [
     "null_resource.make_project_work_dir",
-    "null_resource.make_virtualenv_work_dir",
-    "null_resource.build_virtualenv",
+    "null_resource.make_dependencies_work_dir",
+    "null_resource.build_dependencies",
   ]
 
   provisioner "local-exec" {
     # Which runtime we're using
     # Where we're building
     # our SHA, to tell where our work directory is
-    # The requirements SHA, so we know where our virtualenv is
-    command = "${path.module}/scripts/build_payload.sh"
+    # The requirements SHA, so we know where our environment is
+    command = "${path.module}/scripts/${data.null_data_source.engine.results["engine"]}/build_payload.sh"
 
     environment {
-      PAYLOAD_NAME     = "${var.name}"
-      PAYLOAD_RUNTIME  = "${var.runtime}"
-      PROJECT_PATH     = "${var.project_path}"
-      PROJECT_SHA      = "${data.external.project_sha.result["sha"]}"
-      REQUIREMENTS_SHA = "${data.external.requirements_sha.result["sha"]}"
-      OUTPUT_PATH      = "${var.output_path}"
-      FILENAME         = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
+      PAYLOAD_NAME    = "${var.name}"
+      PAYLOAD_RUNTIME = "${var.runtime}"
+      PROJECT_PATH    = "${var.project_path}"
+      PROJECT_SHA     = "${data.external.project_sha.result["sha"]}"
+      OUTPUT_PATH     = "${var.output_path}"
+      FILENAME        = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
     }
   }
+
   provisioner "local-exec" {
-    when = "destroy"
+    when    = "destroy"
     command = "rm -f ${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
   }
 }
 
-resource "null_resource" "build_virtualenv" {
+resource "null_resource" "build_environment" {
   triggers {
     project_sha      = "${data.external.project_sha.result["sha"]}"
-    requirements_sha = "${data.external.requirements_sha.result["sha"]}"
+    dependencies_sha = "${data.external.dependencies_sha.result["sha"]}"
     payload_exists   = "${data.external.payload_exists.result["identifier"]}"
   }
 
-  depends_on = ["null_resource.make_virtualenv_work_dir"]
+  depends_on = ["null_resource.make_environment_work_dir"]
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/build_virtualenv.sh ${var.runtime} ${var.requirements_file != "" ? var.requirements_file : "null"} ${data.external.requirements_sha.result["sha"]}"
+    command = "${path.module}/scripts/${data.null_data_source.engine.results["engine"]}/build_environment.sh"
+
+    environment {
+      PROJECT_PATH      = "${var.project_path}"
+      RUNTIME           = "${var.runtime}"
+      DEPENDENCIES_FILE = "${var.dependencies_file != "" ? var.dependencies_file : "null"}"
+      DEPENDENCIES_SHA  = "${data.external.dependencies_sha.result["sha"]}"
+      CUSTOM_COMMANDS   = "${local.custom["install"]}"
+    }
   }
 }
 
-resource "null_resource" "cleanup_virtualenv_work_directory" {
+resource "null_resource" "cleanup_environment_work_directory" {
   triggers {
     project = "${null_resource.build_payload.id}"
   }
@@ -132,7 +159,7 @@ resource "null_resource" "cleanup_virtualenv_work_directory" {
   depends_on = ["null_resource.build_payload"]
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/cleanup.sh ${data.external.requirements_sha.result["sha"]}"
+    command = "${path.module}/scripts/cleanup.sh ${data.external.dependencies_sha.result["sha"]}"
   }
 }
 

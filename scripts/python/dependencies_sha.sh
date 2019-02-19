@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-eval "$(jq -r '@sh "NAME=\(.name) REQUIREMENTS_FILE=\(.requirements_file)"')"
+eval "$(jq -r '@sh "NAME=\(.name) REQUIREMENTS_FILE=\(.modules_file)"')"
 
 if [ "$REQUIREMENTS_FILE" != "null" ]; then
   current_requirements_sha=$(shasum -a 256 "${REQUIREMENTS_FILE}" | cut -d " " -f 1)

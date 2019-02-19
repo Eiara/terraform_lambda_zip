@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Name of the function payload thing"
+  description = "Name of the function payload"
 }
 
 variable "project_path" {
@@ -13,11 +13,18 @@ variable "output_path" {
 # Optional settings
 
 variable "runtime" {
-  default     = "python3.6"
-  description = "Python runtime. defaults to 3.6."
+  description = "What runtime. Currently supported: python, nodejs"
 }
 
-variable "requirements_file" {
+variable "dependencies_file" {
   default     = ""
-  description = "the path to the requirements file. Can be empty."
+  description = "the path to the dependencies file. Can be empty."
+}
+
+variable "custom_install_commands" {
+  type = "list"
+  description = ""
+  default = [
+    "",
+  ]
 }
