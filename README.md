@@ -1,6 +1,6 @@
-# Python-Lambda
+# Terraform-Lambda-Zip
 
-This is a Terraform module implements the necessary moving parts to take a path that contains a Python project and a `requirements.txt` file, and will compile that path into a zip payload for deployment to AWS Lambda.
+This is a Terraform module implements the necessary moving parts to take a path that contains a Python or Node project and into a `.zip` payload for deployment to AWS Lambda.
 
 It _requires_ that you have the following packages installed:
 
@@ -9,16 +9,24 @@ It _requires_ that you have the following packages installed:
  - `openssl`
  - BSD `md5` or Linux `md5sum`
  - `python2.7` and `python3.6`, selectable via `pyenv`
+ - `node` and `npm`
  - `virtualenv`, in the selected python runtime, installed via `pip`
  - `terraform` v0.11.2 or higher. This project _may_ be usable with lower, but it is _untested._
+ 
+## Impetus
+
+This module exists to make it easier to construct stable, long-lived zipped payloads for AWS Lambda functions, allowing for the Python or NodeJS Lambda functions to live in the same repository as the rest of the infracode.
+
 
 ## How It Works
 
-This module makes extensive use of `null_resource`s and temporary directories (from `$TMPDIR`) to construct a virtualenv and project directory that are zipped according to the [AWS documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html).
+This module makes extensive use of `null_resource`s and temporary directories (from `$TMPDIR`) to construct a project directory that is zipped according to the [AWS documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html).
 
 Because it uses temporary directories extensively, it _requires_ a user-provided output path to ensure that the written zip is not cleaned up during normal system maintenance.
 
-Building a private virtualenv and project directory is used to perform `python -m compileall`, in order to create the appropriate `.pyc` files. This is done to ensure faster startup time for the Lambda function.
+For Python, this project directory will include building a private virtualenv and running `python -m compileall`, in order to create the appropriate `.pyc` files. This is done to ensure faster startup time for the Lambda function.
+
+Installing `node_modules` is handled in a temporary work directory, to avoid cluttering the repository.
 
 Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. This is done to provide a stable indicator of whether or not a file has been deleted, and if it needs to be re-created.
 
@@ -32,15 +40,15 @@ Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. 
       project_path      = "${path.module}/lambda"
       output_path       = "${path.module}/output_path"
       runtime           = "python3.6"
-      requirements_file = "${path.module}/lambda/requirements.txt"
+      dependencies_file = "${path.module}/lambda/requirements.txt"
     }
 ```
 
 - `name`:               the name of this zip. used to construct the payload zip filename.
 - `project_path`:       The path to your Python lambda project, _not_ the `.py` file.
 - `output_path`:        Where to write the final zip.
-- `runtime`:            *Optional*. Defaults to `python3.6`.
-- `requirements_file`:  *Optional*. Not providing a requirements.txt will still build a virtualenv, but will otherwise work normally.
+- `runtime`:            supports nodejs6.10, nodejs8.10, python2.7, python3.6, python3.7
+- `dependencies_file`:  *Optional*. Not providing a dependency file will otherwise work normally. This largely exists to support Python projects that update the requirements file out of band.
 
 ## Outputs
 
@@ -52,4 +60,4 @@ Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. 
 
 ## License
 
-This project is copyright 2018 Eiara Limited, and licensed under the terms of the MIT license.
+This project is Copyright 2018-2019 Eiara Limited, and licensed under the terms of the MIT license.
