@@ -1,3 +1,4 @@
 tests/*/output/*.zip
 .terraform
 *.tfstate*
+*.zip
