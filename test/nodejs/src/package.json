@@ -1,0 +1,11 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "AWS Lambda Function test function",
+  "main": "index.js",
+  "author": "aurynn@eiara.nz",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.4.6"
+  }
+}
