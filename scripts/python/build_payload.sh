@@ -21,7 +21,7 @@ if [ $RUNTIME != "python2.7" ] && [ $RUNTIME != "python3.6" ] && [ $RUNTIME != "
   exit 1
 fi
 
-VIRTUALENV="${TMPDIR}${VIRTUALENV_SHA}"
+VIRTUALENV="${TMPDIR}${WORK_SHA}"
 SITE_PACKAGES="${VIRTUALENV}/lib/${RUNTIME}/site-packages/"
 BIN="$VIRTUALENV/bin"
 WORK_DIR="${TMPDIR}${WORK_SHA}"
