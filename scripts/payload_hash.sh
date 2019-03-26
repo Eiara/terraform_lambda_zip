@@ -11,6 +11,11 @@ if ! [ -f ${FILENAME} ]; then
 fi
 
 sha=$(openssl dgst -sha256 -binary ${FILENAME} | openssl enc -base64)
-md5=$(md5 -q ${FILENAME})
+
+if (which md5 > /dev/null 2>&1); then
+  md5=$(md5 -q ${FILENAME})
+else
+  md5=($(md5sum ${FILENAME}))
+fi
 
 jq -n --arg sha "$sha" --arg md5 "$md5" '{"sha":$sha, "md5": $md5}'
