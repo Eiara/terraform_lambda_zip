@@ -6,8 +6,9 @@ PYTHON_RUNTIME=$1
 REQUIREMENTS_FILE=$2
 REQUIREMENTS_SHA=$3
 
-echo "INFO: Using work dir $WORK_DIR"
 WORK_DIR=${TMPDIR}${REQUIREMENTS_SHA}
+
+echo "INFO: Using work dir $WORK_DIR"
 
 if ! [ -d $WORK_DIR ]; then
   echo "ERROR: Work directory doesn't exist!"
