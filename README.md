@@ -7,7 +7,7 @@ It _requires_ that you have the following packages installed:
  - `jq`
  - `pyenv`
  - `openssl`
- - BSD `md5`
+ - BSD `md5` or Linux `md5sum`
  - `python2.7` and `python3.6`, selectable via `pyenv`
  - `virtualenv`, in the selected python runtime, installed via `pip`
  - `terraform` v0.11.2 or higher. This project _may_ be usable with lower, but it is _untested._
