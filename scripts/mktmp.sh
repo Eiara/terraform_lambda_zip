@@ -7,6 +7,7 @@ set -e
 
 WORK_DIR="${TMPDIR}${2}"
 echo "INFO: Attempting to make temporary directory $WORK_DIR"
+# TODO: Is this the best way of expressing the "is the variable null"?
 if [ "$TMPDIR " == " " ]; then
   echo "ERROR: while making $1, found null TMPDIR"
   exit 1
@@ -19,7 +20,7 @@ if [ -d $WORK_DIR ]; then
   # And
   # something else is using the same name for the build
   # So we need to error
-  echo "WARN: While making $1 temporary directory already exists"
+  echo "WARN: While making $1, temporary directory already exists"
   echo "WARN: Deleting!"
   # TODO: Make this a lot more defensive than it is
   rm -rf $WORK_DIR

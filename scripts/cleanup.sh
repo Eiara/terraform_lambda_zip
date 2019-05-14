@@ -6,12 +6,12 @@ WORK_DIR="${TMPDIR}${1}"
 # Improve defensive options here
 
 if [[ "${1} " = " " ]] ; then
-  echo "no sha specified"
+  echo "Error: no SHA specified"
   exit 1
 fi
 
 if [ "${TMPDIR} " == " " ] || [ "${1}" == "/" ] ; then
-  echo "unsafe tmpdir or sha path"
+  echo "ERROR: unsafe TMPDIR or SHA path"
   exit 1
 fi
 

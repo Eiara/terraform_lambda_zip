@@ -15,8 +15,10 @@ if ! [ -d $OUTPUT_PATH ]; then
   exit 1
 fi
 
-if [ $RUNTIME != "python2.7" ] && [ $RUNTIME != "python3.6" ]; then
-  echo "ERROR: Invalid python runtime $RUNTIME"
+PYTHON_VERSIONS="python2.7 python3.6 python3.7"
+
+if ! [[ $PYTHON_VERSIONS =~ (^|[[:space:]])$RUNTIME($|[[:space:]]) ]]; then
+  echo "ERROR: Invalid python runtime $PYTHON_RUNTIME"
   exit 1
 fi
 
@@ -48,9 +50,9 @@ echo "INFO: Building virtualenv zip archive"
 pushd $SITE_PACKAGES
 ${BIN}/python -m compileall . > /dev/null 2>&1
 
-# Exclude all the default python stuff that's unnecessary in this context
+# Exclude all the default python stuff that's unnecessary in the default context
 
-zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*" -x "boto3*" -x "botocore*"
+/usr/bin/zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*" -x "boto3*" -x "botocore*"
 
 # zip -r -q virtualenv.zip .
 
@@ -59,7 +61,7 @@ if ! [ -e $SITE_PACKAGES/virtualenv.zip ]; then
   # Well
   # that's bad?
   # Something went wrong?
-  echo "ERROR: Missing virtualenv archive"
+  echo "ERROR: Missing virtualenv archive at $SITE_PACKAGES/virtualenv.zip"
   exit 1
 fi
 
@@ -86,7 +88,7 @@ cp $SITE_PACKAGES/virtualenv.zip .
 
 # Build the zipfile, exclude git stuff, and exclude the requirements.txt, if it exists
 echo "building payload zip"
-zip -q -r virtualenv.zip ./* -x .git -x requirements.txt
+/usr/bin/zip -q -r virtualenv.zip ./* -x .git -x requirements.txt
 
 # Output path is expected to be a fully qualified filename
 mv virtualenv.zip ${OUTPUT_PATH}/${FILENAME}
