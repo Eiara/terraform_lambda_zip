@@ -35,8 +35,11 @@ fi
 # This should make it easier to control whether or not we're doing
 # something reasonable here.
 
-PYENV="/usr/local/bin/pyenv"
-VIRTUALENV="/usr/local/bin/pyenv-virtualenv"
+# This assumes that the user has the proper path set to the pyenv
+# executable, but does not require `eval "$(penv init -)"` to have been
+# run. If it has, however, this will still work by ensuring we run the
+# executable, not the shell function.
+PYENV="command pyenv"
 
 # eval "$(pyenv init -)"
 MAJOR_VERSION=$(echo $PYTHON_RUNTIME | sed 's/python//')
