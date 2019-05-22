@@ -52,7 +52,7 @@ ${BIN}/python -m compileall . > /dev/null 2>&1
 
 # Exclude all the default python stuff that's unnecessary in the default context
 
-/usr/bin/zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*" -x "boto3*" -x "botocore*"
+zip -r -q virtualenv.zip . -x "pip*" -x "setuptools*" -x "wheel*" -x easy_install.py -x "__pycache__/easy_install*" -x "*.dist-info*" -x "boto3*" -x "botocore*"
 
 # zip -r -q virtualenv.zip .
 
@@ -88,7 +88,7 @@ cp $SITE_PACKAGES/virtualenv.zip .
 
 # Build the zipfile, exclude git stuff, and exclude the requirements.txt, if it exists
 echo "building payload zip"
-/usr/bin/zip -q -r virtualenv.zip ./* -x .git -x requirements.txt
+zip -q -r virtualenv.zip ./* -x .git -x requirements.txt
 
 # Output path is expected to be a fully qualified filename
 mv virtualenv.zip ${OUTPUT_PATH}/${FILENAME}
