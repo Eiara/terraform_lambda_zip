@@ -42,7 +42,7 @@ data "external" "payload_exists" {
 }
 
 # This will create a new work directory only if the requirements
-# has changed
+# or the variable name has changed
 resource "null_resource" "make_virtualenv_work_dir" {
   triggers {
     requirements = "${data.external.requirements_sha.result["sha"]}"
