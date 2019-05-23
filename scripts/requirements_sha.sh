@@ -4,8 +4,7 @@ set -e
 eval "$(jq -r '@sh "NAME=\(.name) REQUIREMENTS_FILE=\(.requirements_file)"')"
 
 if [ "$REQUIREMENTS_FILE" != "null" ]; then
-  current_requirements_sha=$(shasum -a 256 "${REQUIREMENTS_FILE}" | cut -d " " -f 1)
-  
+  current_requirements_sha=$(echo "$NAME" | cat - "${REQUIREMENTS_FILE}" | shasum -a 256 | cut -d " " -f 1)
 else
   current_requirements_sha=$(echo "$NAME" | shasum -a 256 - | cut -d " " -f 1)
   # >&2 echo "$current_requirements_sha"
