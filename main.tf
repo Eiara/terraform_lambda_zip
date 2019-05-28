@@ -1,3 +1,7 @@
+terraform {
+  required_version = "~> 0.11.2"
+}
+
 # Sha the requirements file. This determines whether or not we need to
 # rebuild the virtualenv (which will trigger whether or not we need to rebuild)
 # the payload
