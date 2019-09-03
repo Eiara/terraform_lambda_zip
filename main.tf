@@ -6,6 +6,7 @@ locals {
   engine_lookup = {
     "python3.7"  = "python"
     "python3.6"  = "python"
+    "nodejs10.x" = "nodejs"
     "nodejs8.10" = "nodejs"
     "nodejs6.10" = "nodejs"
   }
