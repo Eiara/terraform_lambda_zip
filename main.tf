@@ -31,7 +31,7 @@ data "external" "dependencies_sha" {
   program = ["bash", "${path.module}/scripts/dependencies_sha.sh"]
 
   query = {
-    dependencies_file = "${var.dependencies_file != "" ? var.dependencies_file : "null" }"
+    dependencies_file = "${local.dependencies_file != "" ? local.dependencies_file : "null" }"
     name              = "${var.name}"
   }
 
@@ -134,7 +134,7 @@ resource "null_resource" "build_dependencies" {
     environment {
       PROJECT_PATH      = "${var.project_path}"
       RUNTIME           = "${var.runtime}"
-      DEPENDENCIES_FILE = "${var.dependencies_file != "" ? var.dependencies_file : "null"}"
+      DEPENDENCIES_FILE = "${local.dependencies_file != "" ? local.dependencies_file : "null"}"
       WORK_SHA  = "${data.external.project_sha.result["sha"]}"
       CUSTOM_COMMANDS   = "${local.custom["install"]}"
     }
