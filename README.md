@@ -12,7 +12,7 @@ It _requires_ that you have the following packages installed:
  - `node` and `npm`
  - `virtualenv`, in the selected python runtime, installed via `pip`
  - `terraform` v0.11.2 or higher. This project _may_ be usable with lower, but it is _untested._
- 
+
 ## Impetus
 
 This module exists to make it easier to construct stable, long-lived zipped payloads for AWS Lambda functions, allowing for the Python or NodeJS Lambda functions to live in the same repository as the rest of the infracode.
@@ -47,7 +47,7 @@ Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. 
 - `name`:               the name of this zip. used to construct the payload zip filename.
 - `project_path`:       The path to your Python lambda project, _not_ the `.py` file.
 - `output_path`:        Where to write the final zip.
-- `runtime`:            supports nodejs6.10, nodejs8.10, python2.7, python3.6, python3.7
+- `runtime`:            supports nodejs6.10, nodejs8.10, nodejs10.x, python2.7, python3.6, python3.7
 - `dependencies_file`:  *Optional*. Not providing a dependency file will otherwise work normally. This largely exists to support Python projects that update the requirements file out of band.
 
 ## Outputs
