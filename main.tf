@@ -4,6 +4,7 @@ terraform {
 
 locals {
   engine_lookup = {
+    "python2.7"  = "python"
     "python3.7"  = "python"
     "python3.6"  = "python"
     "nodejs10.x" = "nodejs"
