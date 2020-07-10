@@ -1,7 +1,3 @@
-terraform {
-  required_version = "~> 0.11.2"
-}
-
 locals {
   engine_lookup = {
     "python3.7"  = "python"
@@ -12,13 +8,13 @@ locals {
   }
 
   custom = {
-    install = "${join(" && ", compact(var.custom_install_commands))}"
+    install = join(" && ", compact(var.custom_install_commands))
   }
 }
 
 data "null_data_source" "engine" {
   inputs = {
-    engine = "${lookup(local.engine_lookup, var.runtime)}"
+    engine = local.engine_lookup[var.runtime]
   }
 }
 
@@ -26,15 +22,13 @@ data "null_data_source" "engine" {
 # rebuild the dependencies (which will trigger whether or not we need to rebuild)
 # the payload
 
-
 data "external" "dependencies_sha" {
   program = ["bash", "${path.module}/scripts/dependencies_sha.sh"]
 
   query = {
-    dependencies_file = "${local.dependencies_file != "" ? local.dependencies_file : "null" }"
-    name              = "${var.name}"
+    dependencies_file = local.dependencies_file != "" ? local.dependencies_file : "null"
+    name              = var.name
   }
-
   # returns 1 result, a sha
 }
 
@@ -45,9 +39,8 @@ data "external" "project_sha" {
   program = ["bash", "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/project_sha.sh"]
 
   query = {
-    project_path = "${var.project_path}"
+    project_path = var.project_path
   }
-
   # returns 1 result, a sha
 }
 
@@ -55,10 +48,9 @@ data "external" "payload_exists" {
   program = ["python", "${path.module}/scripts/payload_exists.py"]
 
   query = {
-    name        = "${var.name}"
-    output_path = "${var.output_path}"
+    name        = var.name
+    output_path = var.output_path
   }
-
   # Returns a stable identifier to determine whether or not
   # a payload archive actually exists, to provide a metadata
   # codepoint to tell if a user has, in fact, deleted the payload
@@ -70,13 +62,12 @@ data "external" "payload_exists" {
 # has changed
 
 resource "null_resource" "make_project_work_dir" {
-  triggers {
-    requirements = "${data.external.dependencies_sha.result["sha"]}"
-
+  triggers = {
+    requirements = data.external.dependencies_sha.result["sha"]
     # the dependencies has been explicitly deleted already, by the cleanup code
     # later on, so if the project has changed we need to rebuild it
-    project = "${data.external.project_sha.result["sha"]}"
-    payload_exists = "${data.external.payload_exists.result["identifier"]}"
+    project        = data.external.project_sha.result["sha"]
+    payload_exists = data.external.payload_exists.result["identifier"]
   }
 
   provisioner "local-exec" {
@@ -85,14 +76,14 @@ resource "null_resource" "make_project_work_dir" {
 }
 
 resource "null_resource" "build_payload" {
-  triggers {
-    build_dependencies = "${null_resource.build_dependencies.id}"
-    payload_exists     = "${data.external.payload_exists.result["identifier"]}"
+  triggers = {
+    build_dependencies = null_resource.build_dependencies.id
+    payload_exists     = data.external.payload_exists.result["identifier"]
   }
 
   depends_on = [
-    "null_resource.make_project_work_dir",
-    "null_resource.build_dependencies"
+    null_resource.make_project_work_dir,
+    null_resource.build_dependencies,
   ]
 
   provisioner "local-exec" {
@@ -102,51 +93,54 @@ resource "null_resource" "build_payload" {
     # The requirements SHA, so we know where our environment is
     command = "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/build_payload.sh"
 
-    environment {
-      PAYLOAD_NAME    = "${var.name}"
-      PAYLOAD_RUNTIME = "${var.runtime}"
-      PROJECT_PATH    = "${var.project_path}"
-      PROJECT_SHA     = "${data.external.project_sha.result["sha"]}"
-      WORK_SHA        = "${data.external.project_sha.result["sha"]}"
-      OUTPUT_PATH     = "${var.output_path}"
+    environment = {
+      PAYLOAD_NAME    = var.name
+      PAYLOAD_RUNTIME = var.runtime
+      PROJECT_PATH    = var.project_path
+      PROJECT_SHA     = data.external.project_sha.result["sha"]
+      WORK_SHA        = data.external.project_sha.result["sha"]
+      OUTPUT_PATH     = var.output_path
       FILENAME        = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
     }
   }
-
+  
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = "rm -f ${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
   }
 }
 
+
 resource "null_resource" "build_dependencies" {
-  triggers {
-    project_sha      = "${data.external.project_sha.result["sha"]}"
-    dependencies_sha = "${data.external.dependencies_sha.result["sha"]}"
-    payload_exists   = "${data.external.payload_exists.result["identifier"]}"
+  triggers = {
+    project_sha      = data.external.project_sha.result["sha"]
+    dependencies_sha = data.external.dependencies_sha.result["sha"]
+    payload_exists   = data.external.payload_exists.result["identifier"]
   }
 
-  depends_on = ["null_resource.make_project_work_dir"]
+  depends_on = [null_resource.make_project_work_dir]
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/build_environment.sh"
 
-    environment {
-      PROJECT_PATH      = "${var.project_path}"
-      RUNTIME           = "${var.runtime}"
-      DEPENDENCIES_FILE = "${local.dependencies_file != "" ? local.dependencies_file : "null"}"
-      WORK_SHA  = "${data.external.project_sha.result["sha"]}"
-      CUSTOM_COMMANDS   = "${local.custom["install"]}"
+    environment = {
+      PROJECT_PATH      = var.project_path
+      RUNTIME           = var.runtime
+      DEPENDENCIES_FILE = local.dependencies_file != "" ? local.dependencies_file : "null"
+      WORK_SHA          = data.external.project_sha.result["sha"]
+      CUSTOM_COMMANDS   = local.custom["install"]
     }
   }
 }
 
 resource "null_resource" "cleanup_environment_work_directory" {
-  triggers {
-    project = "${null_resource.build_payload.id}"
+  triggers = {
+    project = null_resource.build_payload.id
   }
 
-  depends_on = ["null_resource.build_payload"]
+  depends_on = [
+    null_resource.build_payload,
+  ]
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/cleanup.sh ${data.external.dependencies_sha.result["sha"]}"
@@ -154,11 +148,13 @@ resource "null_resource" "cleanup_environment_work_directory" {
 }
 
 resource "null_resource" "cleanup_project_work_directory" {
-  triggers {
-    project = "${null_resource.build_payload.id}"
+  triggers = {
+    project = null_resource.build_payload.id
   }
 
-  depends_on = ["null_resource.build_payload"]
+  depends_on = [
+    null_resource.build_payload,
+  ]
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/cleanup.sh ${data.external.project_sha.result["sha"]}"
@@ -168,10 +164,13 @@ resource "null_resource" "cleanup_project_work_directory" {
 data "external" "payload_sha" {
   program = ["bash", "${path.module}/scripts/payload_hash.sh"]
 
-  depends_on = ["null_resource.build_payload"]
+  depends_on = [
+    null_resource.build_payload,
+  ]
 
   query = {
     filename = "${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
-    id       = "${null_resource.build_payload.id}"
+    id       = null_resource.build_payload.id
   }
 }
+

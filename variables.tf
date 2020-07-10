@@ -22,13 +22,12 @@ variable "dependencies_file" {
 }
 
 variable "requirements_file" {
-  
-  default = ""
+  default     = ""
   description = "DEPRECATED: use dependencies_file"
 }
 
 variable "custom_install_commands" {
-  type = "list"
+  type        = list(string)
   description = ""
   default = [
     "",
@@ -36,10 +35,6 @@ variable "custom_install_commands" {
 }
 
 locals {
-  dependencies_file = "${
-    var.requirements_file != "" ?
-      var.requirements_file : "${
-        var.dependencies_file != "" ? var.dependencies_file : ""
-      }"
-  }"
+  dependencies_file = var.requirements_file != "" ? var.requirements_file : var.dependencies_file != "" ? var.dependencies_file : ""
 }
+

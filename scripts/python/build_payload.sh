@@ -66,6 +66,9 @@ if ! [ -e $SITE_PACKAGES/virtualenv.zip ]; then
   exit 1
 fi
 
+# Move back to where we started
+popd
+
 # Cool
 # There'll always be a virtualenv, because we need to create a clean build 
 # point for our python package
@@ -73,6 +76,8 @@ fi
 
 # Okay
 # Step 1: copy the project from where it is to the workdir
+
+echo "INFO: current working directory is ${PWD}"
 
 cp -r $PYTHON_PROJECT ${WORK_DIR}
 
@@ -91,5 +96,7 @@ cp $SITE_PACKAGES/virtualenv.zip .
 echo "building payload zip"
 zip -q -r virtualenv.zip ./* -x .git -x requirements.txt
 
+popd
+
 # Output path is expected to be a fully qualified filename
-mv virtualenv.zip ${OUTPUT_PATH}/${FILENAME}
+mv ${WORK_DIR}/${BASENAME}/virtualenv.zip ${OUTPUT_PATH}/${FILENAME}

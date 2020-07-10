@@ -7,10 +7,17 @@ output "filename" {
 }
 
 output "sha256" {
-  value = "${data.external.payload_sha.result["sha"]}"
+  value = data.external.payload_sha.result["sha"]
 }
 
 output "md5" {
-  value = "${data.external.payload_sha.result["md5"]}"
+  value = data.external.payload_sha.result["md5"]
 }
 
+#output "md5" {
+#  value = data.archive_file.payload.output_md5
+#}
+#
+#output "sha256" {
+#  value = data.archive_file.payload.output_base64sha256
+#}
