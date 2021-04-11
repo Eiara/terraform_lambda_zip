@@ -1,7 +1,10 @@
 locals {
   engine_lookup = {
+    "python3.8"  = "python"
     "python3.7"  = "python"
     "python3.6"  = "python"
+    "nodejs14.x" = "nodejs"
+    "nodejs12.x" = "nodejs"
     "nodejs10.x" = "nodejs"
     "nodejs8.10" = "nodejs"
     "nodejs6.10" = "nodejs"
@@ -10,12 +13,7 @@ locals {
   custom = {
     install = join(" && ", compact(var.custom_install_commands))
   }
-}
-
-data "null_data_source" "engine" {
-  inputs = {
-    engine = local.engine_lookup[var.runtime]
-  }
+  engine = local.engine_lookup[var.runtime]
 }
 
 # Sha the requirements file. This determines whether or not we need to
@@ -36,7 +34,7 @@ data "external" "dependencies_sha" {
 # If it has, we need to rebuild the project
 
 data "external" "project_sha" {
-  program = ["bash", "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/project_sha.sh"]
+  program = ["bash", "${path.module}/scripts/${local.engine}/project_sha.sh"]
 
   query = {
     project_path = var.project_path
@@ -91,7 +89,7 @@ resource "null_resource" "build_payload" {
     # Where we're building
     # our SHA, to tell where our work directory is
     # The requirements SHA, so we know where our environment is
-    command = "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/build_payload.sh"
+    command = "${path.module}/scripts/${local.engine}/build_payload.sh"
 
     environment = {
       PAYLOAD_NAME    = var.name
@@ -102,11 +100,6 @@ resource "null_resource" "build_payload" {
       OUTPUT_PATH     = var.output_path
       FILENAME        = "${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
     }
-  }
-  
-  provisioner "local-exec" {
-    when    = destroy
-    command = "rm -f ${var.output_path}/${var.name}_${data.external.payload_exists.result["identifier"]}_payload.zip"
   }
 }
 
@@ -121,7 +114,7 @@ resource "null_resource" "build_dependencies" {
   depends_on = [null_resource.make_project_work_dir]
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/${data.null_data_source.engine.outputs["engine"]}/build_environment.sh"
+    command = "${path.module}/scripts/${local.engine}/build_environment.sh"
 
     environment = {
       PROJECT_PATH      = var.project_path

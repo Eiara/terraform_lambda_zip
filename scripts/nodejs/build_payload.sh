@@ -16,7 +16,9 @@ if ! [ -d $WORK_DIR ]; then
   exit 1
 fi
 
-if [ $RUNTIME != "nodejs8.10" ] && [ $RUNTIME != "nodejs6.10" ] && [ $RUNTIME != "nodejs10.x" ]; then
+NODEJS_VERSIONS="nodejs6.10 nodejs8.10 nodejs10.x nodejs12.x nodejs14.x"
+
+if ! [[ $NODEJS_VERSIONS =~ (^|[[:space:]])$RUNTIME($|[[:space:]]) ]]; then
   echo "ERROR: Invalid nodejs runtime $RUNTIME"
   exit 1
 fi

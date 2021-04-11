@@ -57,6 +57,15 @@ Payload zip files are written in the form of `${var.name}_{epoch}_payload.zip`. 
 - `filename`: The filename being exported.
 - `md5`: Suitable for using in the S3 bucket object etag.
 
+## Useful Knowledge
+
+This project _does not_ use the Terraform data source `archive_file`, even though it looks like it should. 
+
+The reason it doesn't is that it uses a shasum of the lambda source to build a temporary directory to install packages and compile source.
+
+When the project sha changes, `archive_file` will error because it can't find the original source directory, which prevents Terraform from running.
+
+As a result, we use custom per-language archival scripts to mimic the `archive_file` functionality.
 
 ## License
 

@@ -6,8 +6,8 @@ eval "$(jq -r '@sh "FILENAME=\(.filename)"')"
 
 if ! [ -f ${FILENAME} ]; then
   jq -n --arg sha "" --arg md5 "" '{"sha":$sha, "md5": $md5}'
-  echo "ERROR: No payload zip at ${FILENAME}!" >&2
-  exit 1
+  # echo "ERROR: No payload zip at ${FILENAME}!" >&2
+  exit 0
 fi
 
 sha=$(openssl dgst -sha256 -binary ${FILENAME} | openssl enc -base64)

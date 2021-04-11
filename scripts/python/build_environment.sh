@@ -16,7 +16,7 @@ if ! [ -d $WORK_DIR ]; then
   exit 1
 fi
 
-PYTHON_VERSIONS="python2.7 python3.6 python3.7"
+PYTHON_VERSIONS="python2.7 python3.6 python3.7 python3.8"
 
 if ! [[ $PYTHON_VERSIONS =~ (^|[[:space:]])$PYTHON_RUNTIME($|[[:space:]]) ]]; then
   echo "ERROR: Invalid python runtime $PYTHON_RUNTIME"
