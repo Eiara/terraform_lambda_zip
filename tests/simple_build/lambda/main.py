@@ -1,4 +1,4 @@
 import sys
 
-print("Complex test")
+print("Simple test")
 sys.exit(1)
