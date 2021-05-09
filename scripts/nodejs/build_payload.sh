@@ -30,5 +30,3 @@ zip -q -r payload.zip .
 popd
 
 mv $WORK_DIR/payload.zip ${OUTPUT_PATH}/${FILENAME}
-
-popd
