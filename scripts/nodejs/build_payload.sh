@@ -27,8 +27,6 @@ pushd $WORK_DIR
 
 zip -q -r payload.zip .
 
-popd
+popd # leave WORK_DIR
 
 mv $WORK_DIR/payload.zip ${OUTPUT_PATH}/${FILENAME}
-
-popd

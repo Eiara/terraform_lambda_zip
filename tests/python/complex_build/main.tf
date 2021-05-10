@@ -1,5 +1,5 @@
 module "zip_test" {
-  source            = "../../"
+  source            = "../../../"
   name              = "test"
   project_path      = "${path.module}/lambda"
   output_path       = "${path.module}/output"

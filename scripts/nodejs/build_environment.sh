@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e 
+set -e
 
 # $PROJECT_DIR
 # $DEPENDENCIES_SHA
@@ -29,4 +29,5 @@ npm install
 # Allows injection of things like 'npm run transpile'
 eval "${CUSTOM_COMMANDS}"
 
-popd
+popd # leave WORK_DIR
+popd # leave PROJECT_PATH
