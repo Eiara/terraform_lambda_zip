@@ -55,6 +55,12 @@ for version in $VERSIONS; do
   break
 done
 
+if ! [ -d $VERSION ]; then
+  echo "ERROR: Python version not found, is it installed in pyenv?"
+  echo "ERROR: Expected: $MAJOR_VERSION"
+  exit 1
+fi
+
 echo "INFO: using python version $VERSION"
 # Versions should be an array now
 
